@@ -12,7 +12,14 @@ Four user types:
 - **Finance Approver (FA):** approves or rejects vendor selections.
 - **Vendor:** external, invite-only portal at `/vendor`, fully isolated from internal data.
 
-**Current state:** Phases 1 (Foundation) and 2 (Database) are complete. The local Supabase schema (26 migrations), seed data and the typed Supabase clients are in place; the UI is still a blank page at `/`. The next phase is Phase 3 (Authentication). Build progress follows the phases in the Implementation Plan.
+**Current state:** Phases 1–3 (Foundation, Database, Authentication) are complete: login, signup, password reset, team invites, the PM onboarding wizard and role-based redirects work. `/dashboard` and `/vendor` are placeholders. The next phase is Phase 4 (Navigation Shell). Build progress follows the phases in the Implementation Plan.
+
+**Auth conventions:**
+- Read the role from JWT claims with `supabase.auth.getClaims()` plus `readAppClaims()` (`src/lib/auth/claims.ts`), never from `user.app_metadata`, which lacks the hook's claims.
+- Route Handlers use `getRequestAuth()` (`src/lib/api/auth.ts`) and the helpers in `src/lib/api/responses.ts`.
+- `src/middleware.ts` owns all page-level redirects: role areas, onboarding, and `?next=` deep links.
+- Password-reset and team-invite emails use `supabase/templates/`. Both link to `/reset-password/{token_hash}`; invites add `?type=invite`. Restart Supabase after changing `config.toml`.
+- Toasts fired on page load need a fixed `id`, because dev strict mode runs effects twice.
 
 **Seed accounts** (local only, password `Password123!`): `pm@`, `dh@`, `fa@`, `vendor1@` and `vendor2@procuremaster.test`, all in the org "Northwind Trading" with one requirement and one RFP. The seeded PM has onboarding marked complete; sign up a new PM to test onboarding. Local emails (auth, password reset) land in Mailpit at http://127.0.0.1:54324.
 

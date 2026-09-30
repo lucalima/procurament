@@ -242,10 +242,16 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Links go to /reset-password/{token_hash}, the route in App Flow §3; the page
+# verifies the token hash itself.
+[auth.email.template.recovery]
+subject = "Reset your ProcureMaster password"
+content_path = "./supabase/templates/recovery.html"
+
+# Team invites reuse the same set-password page (?type=invite).
+[auth.email.template.invite]
+subject = "You have been invited to ProcureMaster"
+content_path = "./supabase/templates/invite.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]

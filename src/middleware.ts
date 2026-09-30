@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { homePathFor, readAppClaims } from '@/lib/auth/claims'
+import { canAccessInternalPath } from '@/lib/auth/route-access'
 import type { Database } from '@/types/database'
 
 /** Routes anyone can open (App Flow §1, §3). */
@@ -101,6 +102,15 @@ export async function middleware(request: NextRequest) {
       const complete = profile?.onboarding_complete ?? false
       if (!complete && !onOnboarding) return redirectTo('/onboarding')
       if (complete && onOnboarding) return redirectTo('/dashboard')
+    }
+
+    // Role-restricted pages (App Flow §10.2: redirect with a permission toast).
+    if (
+      claims.role !== 'vendor' &&
+      !onOnboarding &&
+      !canAccessInternalPath(pathname, claims.role)
+    ) {
+      return redirectTo('/dashboard?notice=forbidden')
     }
   }
 

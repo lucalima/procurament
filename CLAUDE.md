@@ -12,7 +12,18 @@ Four user types:
 - **Finance Approver (FA):** approves or rejects vendor selections.
 - **Vendor:** external, invite-only portal at `/vendor`, fully isolated from internal data.
 
-**Current state:** Phases 1–3 (Foundation, Database, Authentication) are complete: login, signup, password reset, team invites, the PM onboarding wizard and role-based redirects work. `/dashboard` and `/vendor` are placeholders. The next phase is Phase 4 (Navigation Shell). Build progress follows the phases in the Implementation Plan.
+**Current state:** Phases 1–4 are complete (Foundation, Database, Authentication, Navigation Shell):
+- Auth, onboarding and role-based redirects work.
+- The internal app shell has a role-based sidebar with a collapse toggle, a top bar with the search overlay, a live notification bell and the avatar menu (with the dark mode toggle), plus a breadcrumb bar.
+- The vendor portal has its own shell.
+- Every route in the App Flow site map has a placeholder page.
+
+The next phase is Phase 5 (PM Core: Pipeline and RFPs). Build progress follows the phases in the Implementation Plan.
+
+**Shell conventions:**
+- Pages render `<Breadcrumb>` (nested pages only), then `<PageContainer>` and `<PageHeader>` (`src/components/layout/`).
+- Role access per route lives in `src/lib/auth/route-access.ts`, which the middleware enforces with a `?notice=forbidden` toast. Sidebar items live in `src/components/layout/nav-config.ts`. Both follow App Flow §2.1: the FA sees Dashboard, Approvals and Activity.
+- The vendor portal pages live under `src/app/vendor/(portal)/`. The public invite pages under `src/app/vendor/invite/` have no shell.
 
 **Auth conventions:**
 - Read the role from JWT claims with `supabase.auth.getClaims()` plus `readAppClaims()` (`src/lib/auth/claims.ts`), never from `user.app_metadata`, which lacks the hook's claims.

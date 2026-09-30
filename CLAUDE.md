@@ -17,8 +17,18 @@ Four user types:
 - The internal app shell has a role-based sidebar with a collapse toggle, a top bar with the search overlay, a live notification bell and the avatar menu (with the dark mode toggle), plus a breadcrumb bar.
 - The vendor portal has its own shell.
 - Every route in the App Flow site map has a placeholder page.
+- Phase 5 (PM Core) added the PM dashboard (stat cards with sparklines, pipeline snapshot, renewal alerts, recent activity), the drag-and-drop kanban with filters and inline search, the Create/Edit RFP modal, the RFP detail split view with Invite Vendor and Archive, and a vendor detail tab skeleton.
 
-The next phase is Phase 5 (PM Core: Pipeline and RFPs). Build progress follows the phases in the Implementation Plan.
+The next phase is Phase 6 (Vendor Portal). Build progress follows the phases in the Implementation Plan.
+
+**Data conventions:**
+- API routes call `logActivity()` on every state change.
+- The client calls APIs through `apiFetch()` (`src/lib/api/client.ts`), with hooks in `src/lib/queries/`.
+- Kanban drag uses a TanStack optimistic update, not Zustand.
+- Forms use `useForm<z.input, unknown, z.output>`, and API schemas accept the parsed output.
+- Deadlines and contract dates are calendar dates: format them with `formatDate()`/`daysUntil()` in `src/lib/format.ts`, which read only the `yyyy-mm-dd` part.
+- Emails go through `sendEmail()` (`src/lib/email.ts`). Without `RESEND_API_KEY`, it logs the link to the dev-server console instead of sending.
+- Deferred from Phase 5 to Phase 7: the Shortlist and Remove vendor-row actions (no API in Backend Schema §8; they need scoring).
 
 **Shell conventions:**
 - Pages render `<Breadcrumb>` (nested pages only), then `<PageContainer>` and `<PageHeader>` (`src/components/layout/`).

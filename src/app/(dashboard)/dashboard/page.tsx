@@ -1,3 +1,4 @@
+import { PmDashboard } from '@/components/dashboard/pm-dashboard'
 import { PageContainer, PageHeader } from '@/components/layout/page-header'
 import { readAppClaims, type InternalRole } from '@/lib/auth/claims'
 import { createClient } from '@/lib/supabase/server'
@@ -9,7 +10,7 @@ const DESCRIPTIONS: Record<InternalRole, string> = {
   finance_approver: 'Vendor selections waiting for your approval.',
 }
 
-// Role-specific dashboards are built in Phases 5 (PM) and 8 (DH, FA).
+// The DH and FA dashboards are built in Phase 8.
 export default async function DashboardPage() {
   const supabase = createClient()
   const { data } = await supabase.auth.getClaims()
@@ -22,6 +23,7 @@ export default async function DashboardPage() {
         title="Dashboard"
         description={role ? DESCRIPTIONS[role] : undefined}
       />
+      {role === 'procurement_manager' && <PmDashboard />}
     </PageContainer>
   )
 }

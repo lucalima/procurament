@@ -12,7 +12,9 @@ Four user types:
 - **Finance Approver (FA):** approves or rejects vendor selections.
 - **Vendor:** external, invite-only portal at `/vendor`, fully isolated from internal data.
 
-**Current state:** Phase 1 (Foundation) is complete: the scaffold, configuration, design tokens, fonts, shadcn/ui components and folder skeleton are in place, with a blank page at `/`. The next phase is Phase 2 (Database), which needs Docker Desktop running. Build progress follows the phases in the Implementation Plan.
+**Current state:** Phases 1 (Foundation) and 2 (Database) are complete. The local Supabase schema (26 migrations), seed data and the typed Supabase clients are in place; the UI is still a blank page at `/`. The next phase is Phase 3 (Authentication). Build progress follows the phases in the Implementation Plan.
+
+**Seed accounts** (local only, password `Password123!`): `pm@`, `dh@`, `fa@`, `vendor1@` and `vendor2@procuremaster.test`, all in the org "Northwind Trading" with one requirement and one RFP. The seeded PM has onboarding marked complete; sign up a new PM to test onboarding. Local emails (auth, password reset) land in Mailpit at http://127.0.0.1:54324.
 
 ## Reference documents are the source of truth
 
@@ -73,7 +75,18 @@ Which should I implement?
    - **Uppercase:** follow the component specs. Table headers, sidebar section labels and kanban column titles use `uppercase`; everything else follows the no-all-caps rule.
    - **Sidebar:** has a collapse toggle, with the state in Zustand `useAppStore`.
    - **Seed test accounts:** all share the password `Password123!`.
-8. **No new tables** unless the system would break without one. Features with no table in the schema are listed below. When you reach one, first try to build it from existing tables and columns. If that's impossible, stop and ask before adding a table:
+8. **Schema fixes (Phase 2).** The migrations follow the Backend Schema exactly, except where a documented detail could not work as written. Every such fix is marked `-- NOTE` in `supabase/migrations/`:
+   - RLS helper functions are created in 0021, before the policies that call them.
+   - Vendor subqueries use `IN`, since one login can own several `vendor_accounts` rows.
+   - UPDATE policies that change `status` have `WITH CHECK`. Without it, FA approve, PM recall and vendor submit were all rejected.
+   - `create_contract_on_approval` is `SECURITY DEFINER`, so an FA approval can create the contract.
+   - `handle_new_user` skips users without a role (vendors).
+   - There are no `updated_at` triggers on tables that lack the column.
+   - The auth hook has the grants and `search_path` Supabase requires.
+   - The user-approved policies for `requirements`, `rfp_vendor_entries`, `vendor_invites`, `scoring_templates` and the `org-assets` and `contract-documents` buckets are there.
+
+   Regenerate `src/types/database.ts` after any schema change. Write the output with UTF-8 (no BOM) rather than PowerShell's `>`, then run Prettier on it.
+9. **No new tables** unless the system would break without one. Features with no table in the schema are listed below. When you reach one, first try to build it from existing tables and columns. If that's impossible, stop and ask before adding a table:
    - vendor Notes (append-only)
    - DH recommendation comments on reports
    - report share links (7-day expiry)
